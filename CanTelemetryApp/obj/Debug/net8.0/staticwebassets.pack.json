@@ -1,0 +1,25 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\vscode\\CanTelemetryProject\\CanTelemetryApp\\wwwroot\\dashboard.html",
+      "PackagePath": "staticwebassets\\dashboard.html"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.CanTelemetryApp.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.CanTelemetryApp.props",
+      "PackagePath": "build\\CanTelemetryApp.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.CanTelemetryApp.props",
+      "PackagePath": "buildMultiTargeting\\CanTelemetryApp.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.CanTelemetryApp.props",
+      "PackagePath": "buildTransitive\\CanTelemetryApp.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

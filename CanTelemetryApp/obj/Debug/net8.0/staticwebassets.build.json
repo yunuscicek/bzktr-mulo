@@ -1,0 +1,39 @@
+{
+  "Version": 1,
+  "Hash": "5PDg/gnAWaW7XXVP0lJseG9aAHAZ3jOP6iB9b2jTpG4=",
+  "Source": "CanTelemetryApp",
+  "BasePath": "_content/CanTelemetryApp",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "CanTelemetryApp\\wwwroot",
+      "Source": "CanTelemetryApp",
+      "ContentRoot": "D:\\vscode\\CanTelemetryProject\\CanTelemetryApp\\wwwroot\\",
+      "BasePath": "_content/CanTelemetryApp",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "D:\\vscode\\CanTelemetryProject\\CanTelemetryApp\\wwwroot\\dashboard.html",
+      "SourceId": "CanTelemetryApp",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\vscode\\CanTelemetryProject\\CanTelemetryApp\\wwwroot\\",
+      "BasePath": "_content/CanTelemetryApp",
+      "RelativePath": "dashboard.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\dashboard.html"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: can-rabbitmq
+    ports:
+      - "5672:5672"   # Uygulamaların bağlanacağı port
+      - "15672:15672" # Tarayıcıdan gireceğimiz yönetim paneli portu
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest

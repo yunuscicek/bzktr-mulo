@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAN Telemetri Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+
+    <style>
+        body { background-color: #1a1a2e; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { background-color: #16213e; border: 1px solid #0f3460; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .card-title { color: #4ecca3; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .value-text { font-size: 2.5rem; font-weight: bold; color: #fff; }
+        .unit-text { font-size: 1rem; color: #aaa; }
+        .status-badge { position: fixed; top: 10px; right: 10px; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+        .chart-container { position: relative; height: 250px; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <span id="connectionStatus" class="badge bg-danger status-badge">Bağlantı Yok</span>
+
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">🚌 Elektrikli Otobüs Canlı Telemetri</h2>
+
+        <div class="row mb-3">
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">Hız (EBS)</h6><div class="value-text" style="font-size: 1.8rem;"><span id="spdEbs">0</span> <span class="unit-text">km/h</span></div></div></div>
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">Hız (TCU)</h6><div class="value-text" style="font-size: 1.8rem;"><span id="spdTcu">0</span> <span class="unit-text">km/h</span></div></div></div>
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">Pedal</h6><div class="value-text" style="font-size: 1.8rem;"><span id="accl">0</span> <span class="unit-text">%</span></div></div></div>
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">SOC</h6><div class="value-text" style="font-size: 1.8rem;"><span id="soc">0</span> <span class="unit-text">%</span></div></div></div>
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">SOH</h6><div class="value-text" style="font-size: 1.8rem;"><span id="soh">0</span> <span class="unit-text">%</span></div></div></div>
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">Tüketim</h6><div class="value-text" style="font-size: 1.8rem;"><span id="consu">0</span> <span class="unit-text">kWh</span></div></div></div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <h5 class="card-title">Hız Grafiği (Canlı)</h5>
+                    <div class="chart-container">
+                        <canvas id="speedChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <h5 class="card-title">Batarya Şarjı (SOC)</h5>
+                    <div class="chart-container">
+                        <canvas id="socChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12 text-muted text-center small">
+                Data ID: <span id="lastId">-</span> | Update: <span id="lastTime">-</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PORT AYARI: Burayı kendi portunla kontrol et (örn: 5104)
+        const BACKEND_URL = "http://localhost:5104/telemetryHub"; 
+
+        // --- CHART AYARLARI ---
+        const commonOptions = {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: { x: { display: false }, y: { beginAtZero: true } },
+            elements: { point: { radius: 0 } }
+        };
+
+        const ctxSpeed = document.getElementById('speedChart').getContext('2d');
+        const speedChart = new Chart(ctxSpeed, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Hız (km/h)', data: [], borderColor: '#4ecca3', borderWidth: 2, fill: true, backgroundColor: 'rgba(78, 204, 163, 0.1)' }] },
+            options: { ...commonOptions, scales: { ...commonOptions.scales, y: { min: 0, max: 120 } } }
+        });
+
+        const ctxSoc = document.getElementById('socChart').getContext('2d');
+        const socChart = new Chart(ctxSoc, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'SOC (%)', data: [], borderColor: '#e94560', borderWidth: 2, fill: true, backgroundColor: 'rgba(233, 69, 96, 0.1)' }] },
+            options: { ...commonOptions, scales: { ...commonOptions.scales, y: { min: 0, max: 100 } } }
+        });
+
+        // --- SIGNALR BAĞLANTISI ---
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl(BACKEND_URL)
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("TelemetryUpdated", (data) => {
+            const now = new Date().toLocaleTimeString();
+            const msgId = data.messageId.toLowerCase(); // ID kontrolü (büyük/küçük harf duyarsız)
+
+            // --- SENARYO 1: HIZ MESAJI GELDİ (0x4A0) ---
+            // Sadece hız kutularını güncelle, bataryaya dokunma!
+            if (msgId === "0x4a0") {
+                document.getElementById("spdEbs").innerText = data.speedEbs.toFixed(1);
+                document.getElementById("spdTcu").innerText = data.speedTcu.toFixed(1);
+                document.getElementById("accl").innerText = data.accl.toFixed(0);
+                
+                // Sadece hız grafiğini güncelle
+                updateChart(speedChart, now, data.speedTcu);
+            }
+
+            // --- SENARYO 2: BATARYA MESAJI GELDİ (0x4C2) ---
+            // Sadece batarya kutularını güncelle, hıza dokunma!
+            else if (msgId === "0x4c2") {
+                document.getElementById("soc").innerText = data.soc.toFixed(1);
+                document.getElementById("soh").innerText = data.soh.toFixed(1);
+                document.getElementById("consu").innerText = data.consuAvg.toFixed(1);
+                
+                // Sadece batarya grafiğini güncelle
+                updateChart(socChart, now, data.soc);
+            }
+
+            // Bilgi güncellemeleri
+            document.getElementById("lastId").innerText = data.messageId;
+            document.getElementById("lastTime").innerText = now;
+        });
+
+        function updateChart(chart, label, value) {
+            chart.data.labels.push(label);
+            chart.data.datasets[0].data.push(value);
+            if (chart.data.labels.length > 50) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+            }
+            chart.update('none');
+        }
+
+        async function start() {
+            try {
+                await connection.start();
+                document.getElementById("connectionStatus").className = "badge bg-success status-badge";
+                document.getElementById("connectionStatus").innerText = "Bağlı 🟢";
+            } catch (err) {
+                setTimeout(start, 5000);
+            }
+        }
+        start();
+    </script>
+</body>
+</html>
