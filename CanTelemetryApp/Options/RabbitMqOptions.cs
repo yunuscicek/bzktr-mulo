@@ -1,5 +1,3 @@
-//RabbitMqOptions.cs
-
 namespace CanTelemetryApp.Options;
 
 public class RabbitMqOptions

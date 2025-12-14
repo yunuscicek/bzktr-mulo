@@ -1,34 +1,28 @@
-//Program.cs
-
 using CanTelemetryApp.Hubs;
 using CanTelemetryApp.Services;
-using CanTelemetryApp.Options; // RabbitMqOptions burada ise EKLE
+using CanTelemetryApp.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ====================
 // SERVİSLER
-// ====================
 
 builder.Services.AddControllers();
 
-// 🔹 RabbitMQ ayarlarını appsettings.json'dan oku
+// RabbitMQ ayarlarını appsettings.json'dan oku
 builder.Services.Configure<RabbitMqOptions>(
     builder.Configuration.GetSection("RabbitMq")
 );
 
-// 🔹 SignalR
+// SignalR
 builder.Services.AddSignalR();
 
-// 🔹 CAN decoder (singleton)
+// CAN decoder (singleton)
 builder.Services.AddSingleton<CanDecoderService>();
 
-// 🔹 RabbitMQ Consumer (Background Service)
+// RabbitMQ Consumer (Background Service)
 builder.Services.AddHostedService<RabbitMqConsumer>();
 
-// ====================
 // CORS
-// ====================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -40,9 +34,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// ====================
 // MIDDLEWARE
-// ====================
 
 // Statik dosyalar (wwwroot)
 app.UseStaticFiles();
@@ -53,9 +45,7 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-// ====================
 // ENDPOINTS
-// ====================
 
 app.MapControllers();
 

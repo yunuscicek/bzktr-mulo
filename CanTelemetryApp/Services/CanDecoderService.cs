@@ -18,16 +18,12 @@ public class CanDecoderService
 
         try
         {
-            // Hex string'i byte dizisine çevir (örn: "00003075..." -> byte[])
+            // Hex string'i byte dizisine çevir
             var bytes = Convert.FromHexString(raw.Data);
 
-            // ====================================================
             // MESAJ 1: 0x4C2 - ARAÇ GENEL İSTATİSTİK (REAL Değerler)
-            // ====================================================
             if (raw.Id.Equals("0x4C2", StringComparison.OrdinalIgnoreCase))
             {
-                // -- TABLO ANALİZİNE GÖRE --
-                
                 // 1. X_Spd_TCU (Byte 0, Length 8) -> Factor 1.0
                 dto.SpeedTcu = bytes[0];
 
@@ -46,14 +42,12 @@ public class CanDecoderService
                 dto.Accl = (rawAccl * 0.001) - 32;
 
                 // 6. X_Cosu_Avg (Byte 6, Length 16) -> Factor 0.001
-                // Byte 6 ve 7'yi birleştirir (Önceki hatanın sebebi burasıydı)
+                // Byte 6 ve 7'yi birleştirir
                 ushort rawConsu = BitConverter.ToUInt16(bytes, 6);
                 dto.ConsuAvg = rawConsu * 0.001;
             }
 
-            // ====================================================
             // MESAJ 2: 0x4A0 - ŞARJ DURUM (BOOL/Bit Değerleri)
-            // ====================================================
             else if (raw.Id.Equals("0x4A0", StringComparison.OrdinalIgnoreCase))
             {
                 // Bit işlemleri: (Byte >> BitOffset) & 1

@@ -89,21 +89,18 @@ public class RabbitMqConsumer : BackgroundService
 
                 if (rawMsg != null)
                 {
-                    // GÜNCELLEME: ID kontrolü büyük/küçük harf duyarsız yapıldı.
-                    // Decoder servisi ile uyumlu olması için bu önemlidir.
                     bool isTargetMessage = rawMsg.Id.Equals("0x4A0", StringComparison.OrdinalIgnoreCase) || 
                                            rawMsg.Id.Equals("0x4C2", StringComparison.OrdinalIgnoreCase);
 
                     if (isTargetMessage)
                     {
-                        // Konsola bilgi bas (İsterseniz yorum satırı yapabilirsiniz)
+                        // Konsola bilgi bas
                         Console.WriteLine($"RECEIVED: {rawMsg.Id} {rawMsg.Data}");
 
                         // 1. Decode işlemi (DTO döner)
                         var stats = _decoder.Decode(rawMsg);
                         
                         // 2. SignalR ile UI'a gönder
-                        // Yeni DTO yapımız (bool alanlar dahil) UI'a gidecek.
                         await _hubContext.Clients.All.SendAsync("TelemetryUpdated", stats);
                     }
                 }

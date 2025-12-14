@@ -1,5 +1,3 @@
-// Dosya: Models/VehicleStatsDto.cs
-
 namespace CanTelemetryApp.Models;
 
 public class VehicleStatsDto

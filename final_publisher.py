@@ -1,13 +1,9 @@
-# final_publisher.py
-
 import pika
 import json
 import time
 import os
 
-# =====================
 # Ayarlar
-# =====================
 RABBIT_HOST = "localhost"
 EXCHANGE_NAME = "can.exchange"
 ROUTING_KEY = "can.raw"
@@ -15,7 +11,6 @@ QUEUE_NAME = "can.telemetry"
 
 CAN_JSON_PATH = "can.json"  # Proje klasöründeki dosya adı
 
-# =====================
 def main():
     if not os.path.exists(CAN_JSON_PATH):
         print(f"HATA: {CAN_JSON_PATH} bulunamadı. Lütfen dosya yolunu kontrol edin.")
@@ -49,9 +44,7 @@ def main():
 
     print(" CAN JSON Replay Başlıyor...")
 
-    # =====================
     # JSON Yükleme
-    # =====================
     with open(CAN_JSON_PATH, "r", encoding="utf-8") as f:
         try:
             data = json.load(f)  # Array formatı [...]
@@ -64,9 +57,7 @@ def main():
 
     last_ts = None
 
-    # =====================
     # Replay Döngüsü
-    # =====================
     for frame in data:
         try:
             # 1. Validasyon: Data alanı var mı ve uzunluğu 16 mı? (Case Gereksinimi)
