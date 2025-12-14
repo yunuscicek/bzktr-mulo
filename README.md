@@ -13,14 +13,12 @@ RabbitMQ Yönetim Paneline erişmek için: http://localhost:15672
 2. .NET Backend Uygulamasını Başlatma
 Verileri işleyen ve arayüze basan ana uygulamayı çalıştırın. 
 
-# Uygulamayı başlat
 CanTelemetryApp klasörü içerisinde terminalde: 
 dotnet run
 
 3. Veri Yayımcısını Başlatma
 Sisteme test verisi göndermek için Python scriptini kullanıyoruz.
 
-# Örnek kullanım
 CanTelemetryProject klasörü içerisinde terminalde:
 python final_publisher.py
 
