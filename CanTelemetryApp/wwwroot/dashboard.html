@@ -16,6 +16,49 @@
         .unit-text { font-size: 1rem; color: #aaa; }
         .status-badge { position: fixed; top: 10px; right: 10px; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
         .chart-container { position: relative; height: 250px; width: 100%; }
+        
+        /* Göstergeler */
+        .indicator { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 5px; background-color: #555; }
+        .indicator.active { background-color: #4ecca3; box-shadow: 0 0 10px #4ecca3; }
+
+        /* --- LOG AKIŞ EFEKTLERİ (GÜNCELLENDİ) --- */
+        #messageLog {
+            min-height: 120px; /* Biraz küçülttük */
+            
+        }
+
+        /* Varsayılan (Eski Mesajlar) - MAVİ ve KOMPAKT */
+        .log-entry {
+            background-color: rgba(13, 110, 253, 0.1); /* Hafif Mavi Arkaplan */
+            border-left: 3px solid #3498db;             /* Mavi Çizgi */
+            color: #a4d4ff;                             /* Açık Mavi Yazı */
+            
+            /* Kompakt Ayarlar */
+            padding: 2px 8px;       /* Boşluklar azaltıldı */
+            margin-bottom: 3px;     /* Satır arası mesafe azaltıldı */
+            border-radius: 2px;
+
+            /* Animasyon */
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        /* En Yeni Mesaj - YEŞİL ve PARLAK */
+        .log-entry:first-child {
+            background-color: rgba(78, 204, 163, 0.2); /* Hafif Yeşil Arkaplan */
+            border-left: 3px solid #4ecca3;             /* Yeşil Çizgi */
+            color: #fff;                                /* Beyaz Yazı */
+            font-weight: bold;
+            font-size: 1.1rem;                         /* Bir tık daha büyük */
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -25,13 +68,21 @@
     <div class="container mt-4">
         <h2 class="mb-4 text-center">🚌 Elektrikli Otobüs Canlı Telemetri</h2>
 
+        <div class="row mb-3 text-center">
+            <div class="col-12">
+                <span class="mx-2"><span id="indCharge" class="indicator"></span> Şarj Kablosu</span>
+                <span class="mx-2"><span id="indMobil" class="indicator"></span> Araç Hareketli</span>
+                <span class="mx-2"><span id="indReady" class="indicator"></span> EV Ready</span>
+            </div>
+        </div>
+
         <div class="row mb-3">
-            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">Hız (EBS)</h6><div class="value-text" style="font-size: 1.8rem;"><span id="spdEbs">0</span> <span class="unit-text">km/h</span></div></div></div>
-            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">Hız (TCU)</h6><div class="value-text" style="font-size: 1.8rem;"><span id="spdTcu">0</span> <span class="unit-text">km/h</span></div></div></div>
-            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">Pedal</h6><div class="value-text" style="font-size: 1.8rem;"><span id="accl">0</span> <span class="unit-text">%</span></div></div></div>
-            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">SOC</h6><div class="value-text" style="font-size: 1.8rem;"><span id="soc">0</span> <span class="unit-text">%</span></div></div></div>
-            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">SOH</h6><div class="value-text" style="font-size: 1.8rem;"><span id="soh">0</span> <span class="unit-text">%</span></div></div></div>
-            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">Tüketim</h6><div class="value-text" style="font-size: 1.8rem;"><span id="consu">0</span> <span class="unit-text">kWh</span></div></div></div>
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">Hız (EBS)</h6><div class="value-text"><span id="spdEbs">0</span> <span class="unit-text">km/h</span></div></div></div>
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">Hız (TCU)</h6><div class="value-text"><span id="spdTcu">0</span> <span class="unit-text">km/h</span></div></div></div>
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">İvme</h6><div class="value-text"><span id="accl">0</span> <span class="unit-text">(m/s²)</span></div></div></div>
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">SOC</h6><div class="value-text"><span id="soc">0</span> <span class="unit-text">%</span></div></div></div>
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">SOH</h6><div class="value-text"><span id="soh">0</span> <span class="unit-text">%</span></div></div></div>
+            <div class="col-md-2"><div class="card p-2 text-center"><h6 class="card-title">Tüketim</h6><div class="value-text"><span id="consu">0</span> <span class="unit-text">kWh</span></div></div></div>
         </div>
 
         <div class="row">
@@ -53,36 +104,38 @@
             </div>
         </div>
 
-        <div class="row mt-3">
-            <div class="col-12 text-muted text-center small">
-                Data ID: <span id="lastId">-</span> | Update: <span id="lastTime">-</span>
+        <div class="row mt-4">
+            <div class="col-md-8 offset-md-2">
+                <h6 class="text-center small mb-2">CAN BUS Mesaj Akışı</h6>
+                <div id="messageLog">
+                    </div>
             </div>
         </div>
     </div>
 
     <script>
-        // PORT AYARI: Burayı kendi portunla kontrol et (örn: 5104)
-        const BACKEND_URL = "http://localhost:5104/telemetryHub"; 
+        const BACKEND_URL = "/telemetryHub"; 
 
         // --- CHART AYARLARI ---
         const commonOptions = {
             responsive: true, maintainAspectRatio: false, animation: false,
             interaction: { mode: 'index', intersect: false },
-            scales: { x: { display: false }, y: { beginAtZero: true } },
-            elements: { point: { radius: 0 } }
+            scales: { x: { display: false }, y: { beginAtZero: true, grid: { color: '#2a2a40' } } },
+            elements: { point: { radius: 0 } },
+            plugins: { legend: { labels: { color: '#ccc' } } }
         };
 
         const ctxSpeed = document.getElementById('speedChart').getContext('2d');
         const speedChart = new Chart(ctxSpeed, {
             type: 'line',
-            data: { labels: [], datasets: [{ label: 'Hız (km/h)', data: [], borderColor: '#4ecca3', borderWidth: 2, fill: true, backgroundColor: 'rgba(78, 204, 163, 0.1)' }] },
+            data: { labels: [], datasets: [{ label: 'Hız (km/h)', data: [], borderColor: '#4ecca3', borderWidth: 2, fill: true, backgroundColor: 'rgba(78, 204, 163, 0.1)', tension: 0.3 }] },
             options: { ...commonOptions, scales: { ...commonOptions.scales, y: { min: 0, max: 120 } } }
         });
 
         const ctxSoc = document.getElementById('socChart').getContext('2d');
         const socChart = new Chart(ctxSoc, {
             type: 'line',
-            data: { labels: [], datasets: [{ label: 'SOC (%)', data: [], borderColor: '#e94560', borderWidth: 2, fill: true, backgroundColor: 'rgba(233, 69, 96, 0.1)' }] },
+            data: { labels: [], datasets: [{ label: 'SOC (%)', data: [], borderColor: '#e94560', borderWidth: 2, fill: true, backgroundColor: 'rgba(233, 69, 96, 0.1)', tension: 0.3 }] },
             options: { ...commonOptions, scales: { ...commonOptions.scales, y: { min: 0, max: 100 } } }
         });
 
@@ -94,34 +147,52 @@
 
         connection.on("TelemetryUpdated", (data) => {
             const now = new Date().toLocaleTimeString();
-            const msgId = data.messageId.toLowerCase(); // ID kontrolü (büyük/küçük harf duyarsız)
+            const msgId = data.messageId.toLowerCase();
+            
+            // Log ekle
+            addLogEntry(data.messageId, now);
 
-            // --- SENARYO 1: HIZ MESAJI GELDİ (0x4A0) ---
-            // Sadece hız kutularını güncelle, bataryaya dokunma!
-            if (msgId === "0x4a0") {
+            if (msgId === "0x4c2") {
                 document.getElementById("spdEbs").innerText = data.speedEbs.toFixed(1);
                 document.getElementById("spdTcu").innerText = data.speedTcu.toFixed(1);
-                document.getElementById("accl").innerText = data.accl.toFixed(0);
-                
-                // Sadece hız grafiğini güncelle
-                updateChart(speedChart, now, data.speedTcu);
-            }
-
-            // --- SENARYO 2: BATARYA MESAJI GELDİ (0x4C2) ---
-            // Sadece batarya kutularını güncelle, hıza dokunma!
-            else if (msgId === "0x4c2") {
+                document.getElementById("accl").innerText = data.accl.toFixed(2);
                 document.getElementById("soc").innerText = data.soc.toFixed(1);
-                document.getElementById("soh").innerText = data.soh.toFixed(1);
-                document.getElementById("consu").innerText = data.consuAvg.toFixed(1);
                 
-                // Sadece batarya grafiğini güncelle
+                // DÜZELTME: SOH hilesi kaldırıldı, ham veri gösteriliyor.
+                document.getElementById("soh").innerText = data.soh.toFixed(1);
+                
+                document.getElementById("consu").innerText = data.consuAvg.toFixed(3);
+
+                updateChart(speedChart, now, data.speedTcu);
                 updateChart(socChart, now, data.soc);
             }
-
-            // Bilgi güncellemeleri
-            document.getElementById("lastId").innerText = data.messageId;
-            document.getElementById("lastTime").innerText = now;
+            else if (msgId === "0x4a0") {
+                toggleIndicator("indCharge", data.isChargingConnected);
+                toggleIndicator("indMobil", data.isVehicleMobil);
+                toggleIndicator("indReady", data.isEvReady);
+            }
         });
+
+        // --- LOG LİSTESİ YÖNETİMİ ---
+        function addLogEntry(id, time) {
+            const container = document.getElementById("messageLog");
+            
+            const row = document.createElement("div");
+            row.className = "log-entry";
+            row.innerHTML = `<span>📡 <strong>${id}</strong></span> <span style="float:right;">${time}</span>`;
+
+            container.prepend(row);
+
+            if (container.children.length > 5) {
+                container.lastElementChild.remove();
+            }
+        }
+
+        function toggleIndicator(elementId, isActive) {
+            const el = document.getElementById(elementId);
+            if (isActive) el.classList.add("active");
+            else el.classList.remove("active");
+        }
 
         function updateChart(chart, label, value) {
             chart.data.labels.push(label);
@@ -137,7 +208,7 @@
             try {
                 await connection.start();
                 document.getElementById("connectionStatus").className = "badge bg-success status-badge";
-                document.getElementById("connectionStatus").innerText = "Bağlı 🟢";
+                document.getElementById("connectionStatus").innerText = "Sistem Bağlı 🟢";
             } catch (err) {
                 setTimeout(start, 5000);
             }

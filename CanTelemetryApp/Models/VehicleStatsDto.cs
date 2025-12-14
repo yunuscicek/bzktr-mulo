@@ -1,3 +1,5 @@
+// Dosya: Models/VehicleStatsDto.cs
+
 namespace CanTelemetryApp.Models;
 
 public class VehicleStatsDto
@@ -5,13 +7,16 @@ public class VehicleStatsDto
     public string MessageId { get; set; } = default!;
     public double Timestamp { get; set; }
     
-    // 0x4C2 (Şarj Durumu) Mesajından Gelecekler
-    public double Soc { get; set; }       // State of Charge (Batarya %)
-    public double Soh { get; set; }       // State of Health (Sağlık %)
-    public double ConsuAvg { get; set; }  // Ortalama Tüketim
-    
-    // 0x4A0 (Araç Genel) Mesajından Gelecekler
-    public double SpeedTcu { get; set; }  // Hız (TCU)
-    public double SpeedEbs { get; set; }  // Hız (EBS)
-    public double Accl { get; set; }      // İvme (Pedal)
+    // 0x4C2 - Arac_Genel_Istatistik Mesajı (REAL Tipler)
+    public double SpeedTcu { get; set; }
+    public double SpeedEbs { get; set; }
+    public double Soc { get; set; }
+    public double Soh { get; set; }
+    public double Accl { get; set; }
+    public double ConsuAvg { get; set; }
+
+    // 0x4A0 - Sarj_Durum Mesajı (BOOL Tipler)
+    public bool IsChargingConnected { get; set; }
+    public bool IsVehicleMobil { get; set; }
+    public bool IsEvReady { get; set; }
 }

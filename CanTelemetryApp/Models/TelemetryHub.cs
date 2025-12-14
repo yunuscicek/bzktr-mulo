@@ -1,3 +1,5 @@
+//TelemetryHub.cs
+
 using Microsoft.AspNetCore.SignalR;
 using CanTelemetryApp.Models;
 

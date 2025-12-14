@@ -12,44 +12,66 @@ public class CanDecoderService
             Timestamp = raw.Timestamp
         };
 
-        if (string.IsNullOrEmpty(raw.Data) || raw.Data.Length != 16)
+        // Veri boşsa veya eksikse boş DTO dön
+        if (string.IsNullOrEmpty(raw.Data) || raw.Data.Length < 16)
             return dto;
 
         try
         {
-            byte[] bytes = Convert.FromHexString(raw.Data);
+            // Hex string'i byte dizisine çevir (örn: "00003075..." -> byte[])
+            var bytes = Convert.FromHexString(raw.Data);
 
-            // --- TABLOYA GÖRE DOĞRULANMIŞ KOD ---
-
-            // Mesaj: Arac_Genel_Istatistik (0x4A0)
-            if (raw.Id.Equals("0x4A0", StringComparison.OrdinalIgnoreCase))
+            // ====================================================
+            // MESAJ 1: 0x4C2 - ARAÇ GENEL İSTATİSTİK (REAL Değerler)
+            // ====================================================
+            if (raw.Id.Equals("0x4C2", StringComparison.OrdinalIgnoreCase))
             {
-                // Speed_EBS -> Start: 0, Len: 2, Factor: 0.00390625
-                dto.SpeedEbs = BitConverter.ToUInt16(bytes, 0) * 0.00390625;
+                // -- TABLO ANALİZİNE GÖRE --
+                
+                // 1. X_Spd_TCU (Byte 0, Length 8) -> Factor 1.0
+                dto.SpeedTcu = bytes[0];
 
-                // Speed_TCU -> Start: 2, Len: 2, Factor: 0.00390625
-                dto.SpeedTcu = BitConverter.ToUInt16(bytes, 2) * 0.00390625;
+                // 2. X_Spd_EBS (Byte 1, Length 8) -> Factor 1.0
+                dto.SpeedEbs = bytes[1];
 
-                // Accl -> Start: 4, Len: 1, Factor: 0.4
-                // Dikkat: Uzunluk 1 Byte olduğu için direkt bytes dizisinden alıyoruz
-                dto.Accl = bytes[4] * 0.4;
+                // 3. X_SOC (Byte 2, Length 8) -> Factor 1.0
+                dto.Soc = bytes[2];
+
+                // 4. X_SOH (Byte 3, Length 8) -> Factor 1.0
+                dto.Soh = bytes[3];
+
+                // 5. X_Accl (Byte 4, Length 16) -> Factor 0.001, Offset -32
+                // Byte 4 ve 5'i birleştirir (Little Endian varsayımıyla)
+                ushort rawAccl = BitConverter.ToUInt16(bytes, 4);
+                dto.Accl = (rawAccl * 0.001) - 32;
+
+                // 6. X_Cosu_Avg (Byte 6, Length 16) -> Factor 0.001
+                // Byte 6 ve 7'yi birleştirir (Önceki hatanın sebebi burasıydı)
+                ushort rawConsu = BitConverter.ToUInt16(bytes, 6);
+                dto.ConsuAvg = rawConsu * 0.001;
             }
-            // Mesaj: Sarj_Durum (0x4C2)
-            else if (raw.Id.Equals("0x4C2", StringComparison.OrdinalIgnoreCase))
+
+            // ====================================================
+            // MESAJ 2: 0x4A0 - ŞARJ DURUM (BOOL/Bit Değerleri)
+            // ====================================================
+            else if (raw.Id.Equals("0x4A0", StringComparison.OrdinalIgnoreCase))
             {
-                // SOC -> Start: 0, Len: 2, Factor: 0.1
-                dto.Soc = BitConverter.ToUInt16(bytes, 0) * 0.1;
+                // Bit işlemleri: (Byte >> BitOffset) & 1
 
-                // SOH -> Start: 2, Len: 2, Factor: 0.1
-                dto.Soh = BitConverter.ToUInt16(bytes, 2) * 0.1;
+                // S_Chrg_Inlt_Conn (Byte 0, Bit 6)
+                dto.IsChargingConnected = ((bytes[0] >> 6) & 1) == 1;
 
-                // Consu_Avg -> Start: 4, Len: 2, Factor: 0.1
-                dto.ConsuAvg = BitConverter.ToUInt16(bytes, 4) * 0.1;
+                // S_Vh_Mobil (Byte 0, Bit 4)
+                dto.IsVehicleMobil = ((bytes[0] >> 4) & 1) == 1;
+
+                // S_EV_Ready (Byte 1, Bit 2)
+                dto.IsEvReady = ((bytes[1] >> 2) & 1) == 1;
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Decode Error ({raw.Id}): {ex.Message}");
+            // Hata durumunda log basılabilir ama akışı bozmamak için boş DTO döner
+            Console.WriteLine($"Decode Hatası ({raw.Id}): {ex.Message}");
         }
 
         return dto;

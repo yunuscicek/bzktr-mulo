@@ -33,3 +33,4 @@ D:\vscode\CanTelemetryProject\CanTelemetryApp\obj\Debug\net8.0\CanTelemetryApp.p
 D:\vscode\CanTelemetryProject\CanTelemetryApp\obj\Debug\net8.0\CanTelemetryApp.genruntimeconfig.cache
 D:\vscode\CanTelemetryProject\CanTelemetryApp\obj\Debug\net8.0\ref\CanTelemetryApp.dll
 D:\vscode\CanTelemetryProject\CanTelemetryApp\bin\Debug\net8.0\CanTelemetryApp.staticwebassets.runtime.json
+D:\vscode\CanTelemetryProject\CanTelemetryApp\obj\Debug\net8.0\CanTelemetryApp.sourcelink.json

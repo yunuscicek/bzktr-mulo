@@ -1,3 +1,5 @@
+//RawCanMessage.cs
+
 namespace CanTelemetryApp.Models;
 
 public class RawCanMessage

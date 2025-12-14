@@ -1,41 +1,67 @@
+//Program.cs
+
 using CanTelemetryApp.Hubs;
 using CanTelemetryApp.Services;
+using CanTelemetryApp.Options; // RabbitMqOptions burada ise EKLE
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Servisleri ekle
-builder.Services.AddControllers();
-builder.Services.AddSignalR(); 
-builder.Services.AddSingleton<CanDecoderService>(); 
-builder.Services.AddHostedService<RabbitMqConsumer>(); 
+// ====================
+// SERVİSLER
+// ====================
 
-// CORS Ayarları (Genişletildi: Artık her yerden erişime izin veriyor, geliştirme için daha rahat)
+builder.Services.AddControllers();
+
+// 🔹 RabbitMQ ayarlarını appsettings.json'dan oku
+builder.Services.Configure<RabbitMqOptions>(
+    builder.Configuration.GetSection("RabbitMq")
+);
+
+// 🔹 SignalR
+builder.Services.AddSignalR();
+
+// 🔹 CAN decoder (singleton)
+builder.Services.AddSingleton<CanDecoderService>();
+
+// 🔹 RabbitMQ Consumer (Background Service)
+builder.Services.AddHostedService<RabbitMqConsumer>();
+
+// ====================
+// CORS
+// ====================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
         builder => builder
-            .AllowAnyOrigin()  // Tüm kaynaklara izin ver
+            .AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader());
 });
 
 var app = builder.Build();
 
-// --- KRİTİK EKLEME 1: Statik Dosya Sunumu ---
-// Bu satır olmazsa wwwroot klasörü çalışmaz!
-app.UseStaticFiles(); 
+// ====================
+// MIDDLEWARE
+// ====================
 
-// Middleware ayarları
+// Statik dosyalar (wwwroot)
+app.UseStaticFiles();
+
 app.UseCors("AllowAll");
+
 app.UseRouting();
+
 app.UseAuthorization();
 
-// Endpointler
+// ====================
+// ENDPOINTS
+// ====================
+
 app.MapControllers();
+
 app.MapHub<TelemetryHub>("/telemetryHub");
 
-// --- KRİTİK EKLEME 2: Varsayılan Dosya ---
-// Kullanıcı http://localhost:5104 adresine girince direkt dashboard açılsın
+// Varsayılan dosya
 app.MapFallbackToFile("dashboard.html");
 
 app.Run();

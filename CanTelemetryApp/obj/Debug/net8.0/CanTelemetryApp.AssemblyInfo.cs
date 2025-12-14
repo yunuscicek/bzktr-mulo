@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CanTelemetryApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d47e89a9cf22f8da81236895cd24c2c650afeb09")]
 [assembly: System.Reflection.AssemblyProductAttribute("CanTelemetryApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CanTelemetryApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
